@@ -1,0 +1,1 @@
+# plugins-cal-embedder-lite
