@@ -3,9 +3,9 @@ Contributors: useStrict
 Donate link: https://paypal.me/usestrict
 Tags: calendar, calendly, embed
 Requires at least: 4.5
-Tested up to: 6.5.5
+Tested up to: 6.8.1
 Requires PHP: 5.6
-Stable tag: 1.1.7
+Stable tag: 1.1.7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
