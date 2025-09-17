@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || die( 'No direct access allowed' );
  * Author URI:      https://usestrict.consulting
  * Text Domain:     cal-embedder-lite
  * Domain Path:     /language
- * Version:         1.1.7.1
+ * Version:         1.1.7.2
  *
  * @package         Wp_Cal_Embed_Lite
  */
@@ -40,7 +40,7 @@ if ( ! class_exists( 'Wp_Cal_Embed_Lite' ) ) :
 		 *
 		 * @var string
 		 */
-		const VERSION = '1.1.7.1';
+		const VERSION = '1.1.7.2';
 
 		/**
 		 * Holds our environment variables.
@@ -811,7 +811,7 @@ data-wpcalel-query-str="<?php echo $a['query_str'] ? 'true' : 'false'; ?>"
 					case 'refresh':
 						delete_transient( self::$transient );
 						if ( $user ) {
-							add_settings_error( __CLASS_, esc_attr( 'Refresh URLs' ), __( 'Refreshed!', 'cal-embedder-lite' ), 'success' );
+							add_settings_error( __CLASS__, esc_attr( 'Refresh URLs' ), __( 'Refreshed!', 'cal-embedder-lite' ), 'success' );
 						}
 						break;
 					default:
