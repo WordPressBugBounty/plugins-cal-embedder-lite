@@ -28,10 +28,18 @@ $wpcalel_button_text = __( 'Refresh URLs', 'cal-embedder-lite' );
 						<?php if ( isset( $this->settings->api_key ) ) : ?>
 							<div class="notice notice-error inline"><p>
 							<?php
-							_e(  // phpcs:ignore WordPress.Security.EscapeOutput.UnsafePrintingFunction
-								'Using an API Key to connect to Calendly is deprecated and <strong>will stop working in December, 2022</strong>.
-Please create a <a href="https://calendly.com/integrations/api_webhooks" target="_new">Personal Access Token</a>, click disconnect, and reconnect using the new token.',
-								'cal-embedder-lite'
+							/* translators: link to calendly integrations */
+							$wpcalel_notice = __( 'Using an API Key is deprecated and <strong>will stop working</strong>. Please create a <a href="%s" target="_blank" rel="noopener">Personal Access Token</a>.', 'cal-embedder-lite' );
+							echo wp_kses(
+								sprintf( $wpcalel_notice, esc_url( 'https://calendly.com/integrations/api_webhooks' ) ),
+								array(
+									'a'      => array(
+										'href'   => true,
+										'target' => true,
+										'rel'    => true,
+									),
+									'strong' => array(),
+								)
 							);
 							?>
 																		</p></div>
@@ -324,7 +332,14 @@ Please create a <a href="https://calendly.com/integrations/api_webhooks" target=
 										</li>
 										<li>
 											<strong><?php esc_html_e( 'Allow Query Strings:', 'cal-embedder-lite' ); ?></strong>
-											<?php _e( 'Whether to allow Calendly to fetch information from the page URL. Supported strings are <code>name</code>, <code>firstName</code>, <code>lastName</code> and <code>email</code>. If the user is logged in and Prefill is enabled, the Prefill information will take precedence.', 'cal-embedder-lite' ); //phpcs:ignore WordPress.Security.EscapeOutput.UnsafePrintingFunction ?>
+											<?php
+											echo wp_kses(
+												__( 'Whether to allow Calendly to fetch information from the page URL. Supported strings are <code>name</code>, <code>firstName</code>, <code>lastName</code> and <code>email</code>. If the user is logged in and Prefill is enabled, the Prefill information will take precedence.', 'cal-embedder-lite' ),
+												array(
+													'code' => array(),
+												)
+											);
+											?>
 										</li>
 										<li>
 											<strong><?php esc_html_e( 'Min. Width and Height:', 'cal-embedder-lite' ); ?></strong>
@@ -334,7 +349,18 @@ Please create a <a href="https://calendly.com/integrations/api_webhooks" target=
 											<strong><?php esc_html_e( 'Custom Answers 1 to 10:', 'cal-embedder-lite' ); ?></strong>
 											<?php
 											/* translators: Calendly help URL */
-											printf( __( 'Calendly allows for up to 10 extra fields of various types. They explain the values you can enter <a href="%s" target="_blank">here</a>.', 'cal-embedder-lite' ), esc_html( 'https://help.calendly.com/hc/en-us/articles/226766767-Pre-populate-invitee-information-on-the-scheduling-page' ) ); //phpcs:ignore WordPress.Security.EscapeOutput
+											printf(
+												wp_kses(
+													__( 'Calendly allows for up to 10 extra fields of various types. They explain the values you can enter <a href="%s" target="_blank">here</a>.', 'cal-embedder-lite' ),
+													array(
+														'a' => array(
+															'href'   => array(),
+															'target' => array(),
+														),
+													)
+												),
+												esc_url( 'https://help.calendly.com/hc/en-us/articles/226766767-Pre-populate-invitee-information-on-the-scheduling-page' )
+											);
 											?>
 										</li>
 									</ul>
@@ -342,8 +368,18 @@ Please create a <a href="https://calendly.com/integrations/api_webhooks" target=
 									<div class="promo">
 										<p>
 										<?php
-										/* translators: Link to plugin author site */
-										printf( __( 'For more powerful control of your widgets, check out our Calendly Embedder Pro plugin over at <a href="%s">UseStrict Consulting</a>.', 'cal-embedder-lite' ), esc_url( 'https://usestrict.net/calendly-embedder-pro/?utm_source=settings_screen&utm_medium=plugin&utm_campaign=promotion' ) ); //phpcs:ignore WordPress.Security.EscapeOutput
+										echo wp_kses(
+											sprintf(
+												/* translators: Link to plugin author site */
+												__( 'For more powerful control of your widgets, check out our Calendly Embedder Pro plugin over at <a href="%s">UseStrict Consulting</a>.', 'cal-embedder-lite' ),
+												esc_url( 'https://usestrict.net/calendly-embedder-pro/?utm_source=settings_screen&utm_medium=plugin&utm_campaign=promotion' )
+											),
+											array(
+												'a' => array(
+													'href' => array(),
+												),
+											)
+										);
 										?>
 										</p>
 										<p><?php esc_html_e( 'Features include:', 'cal-embedder-lite' ); ?></p>

@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || die( 'No direct access allowed' );
  * Author URI:      https://usestrict.consulting
  * Text Domain:     cal-embedder-lite
  * Domain Path:     /language
- * Version:         1.1.7.2
+ * Version:         1.2
  *
  * @package         Wp_Cal_Embed_Lite
  */
@@ -45,7 +45,7 @@ if ( ! class_exists( 'Wp_Cal_Embed_Lite' ) ) :
 		/**
 		 * Holds our environment variables.
 		 *
-		 * @var array
+		 * @var object
 		 */
 		private $environment;
 
@@ -189,8 +189,8 @@ if ( ! class_exists( 'Wp_Cal_Embed_Lite' ) ) :
 				return __( 'You MUST provide a URL for the Calendly shortcode', 'cal-embedder-lite' );
 			}
 
-			$type   = $a['type'];
-			$widget = $a['widget'];
+			$type   = sanitize_text_field( $a['type'] );
+			$widget = sanitize_text_field( $a['widget'] );
 
 			// Shortcircuit if we have pro handlers.
 			if ( false !== has_filter( 'wpcalep_handler' ) ) {
@@ -232,7 +232,7 @@ if ( ! class_exists( 'Wp_Cal_Embed_Lite' ) ) :
 		 */
 		private function calendly_link_shortcode( $atts, $content = null ) {
 			static $count = 0;
-			$count++;
+			++$count;
 
 			$a = shortcode_atts(
 				array(
@@ -337,7 +337,7 @@ data-wpcalel-query-str="<?php echo $a['query_str'] ? 'true' : 'false'; ?>"
 		 */
 		private function calendly_popup_shortcode( $atts, $content = null ) {
 			static $count = 0;
-			$count++;
+			++$count;
 
 			$a = shortcode_atts(
 				array(
@@ -463,7 +463,7 @@ data-wpcalel-query-str="<?php echo $a['query_str'] ? 'true' : 'false'; ?>"
 		 */
 		private function calendly_inline_shortcode( $atts, $content = null ) {
 			static $count = 0;
-			$count++;
+			++$count;
 
 			$a = shortcode_atts(
 				array(
@@ -853,7 +853,6 @@ data-wpcalel-query-str="<?php echo $a['query_str'] ? 'true' : 'false'; ?>"
 
 			return $plugin_actions;
 		}
-
 	} // End of class.
 
 
