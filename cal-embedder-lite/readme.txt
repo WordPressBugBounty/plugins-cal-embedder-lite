@@ -3,9 +3,9 @@ Contributors: useStrict
 Donate link: https://paypal.me/usestrict
 Tags: calendar, calendly, embed
 Requires at least: 4.5
-Tested up to: 6.8.3
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.2
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -61,6 +61,10 @@ No F.A.Q. yet.
 
 
 == Changelog ==
+= 1.2.1 =
+* Fix version number.
+* Update tested up to.
+
 = 1.2 =
 * Patch XSS vulnerability.
 * Update tested up to.

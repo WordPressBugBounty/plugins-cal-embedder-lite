@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || die( 'No direct access allowed' );
  * Author URI:      https://usestrict.consulting
  * Text Domain:     cal-embedder-lite
  * Domain Path:     /language
- * Version:         1.2
+ * Version:         1.2.1
  *
  * @package         Wp_Cal_Embed_Lite
  */
@@ -40,7 +40,7 @@ if ( ! class_exists( 'Wp_Cal_Embed_Lite' ) ) :
 		 *
 		 * @var string
 		 */
-		const VERSION = '1.1.7.2';
+		const VERSION = '1.2.1';
 
 		/**
 		 * Holds our environment variables.
