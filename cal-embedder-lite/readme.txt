@@ -3,9 +3,9 @@ Contributors: useStrict
 Donate link: https://paypal.me/usestrict
 Tags: calendar, calendly, embed
 Requires at least: 4.5
-Tested up to: 7.0
+Tested up to: 7.1.1
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -61,6 +61,11 @@ No F.A.Q. yet.
 
 
 == Changelog ==
+= 1.2.2 =
+* Security: the Calendly Personal Access Token is no longer displayed in the settings page and is stored in a non-autoloaded option.
+* Reliability: guard against malformed/failed Calendly API responses (no more PHP warnings or empty dropdowns on a transient outage).
+* Add a direct-access guard to the settings template; fix the Pro-detection hook name and the API request Content-Type header.
+
 = 1.2.1 =
 * Fix version number.
 * Update tested up to.

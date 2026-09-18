@@ -1,2 +1,12 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Dev/CI/meta files — never ship in the plugin nor leak into wp.org trunk.
+# (10up deploy/asset actions honour export-ignore.)
+.github/ export-ignore
+.github/** export-ignore
+.wordpress-org/ export-ignore
+.wordpress-org/** export-ignore
+.gitattributes export-ignore
+.gitignore export-ignore
+.distignore export-ignore

@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || die( 'No direct access allowed' );
  * Author URI:      https://usestrict.consulting
  * Text Domain:     cal-embedder-lite
  * Domain Path:     /language
- * Version:         1.2.1
+ * Version:         1.2.2
  *
  * @package         Wp_Cal_Embed_Lite
  */
@@ -40,7 +40,7 @@ if ( ! class_exists( 'Wp_Cal_Embed_Lite' ) ) :
 		 *
 		 * @var string
 		 */
-		const VERSION = '1.2.1';
+		const VERSION = '1.2.2';
 
 		/**
 		 * Holds our environment variables.
@@ -143,8 +143,9 @@ if ( ! class_exists( 'Wp_Cal_Embed_Lite' ) ) :
 			add_action( 'init', array( $this, 'add_shortcode' ) );
 			add_action( 'wp_ajax_wpcalel-userinfo', array( $this, 'ajax_get_user_info' ) );
 
-			// Register menu if Pro is not installed.
-			if ( false === has_filter( 'wpcalep-handler' ) ) {
+			// Register menu only if Pro is not present (it signals via wpcalep_handler,
+			// the same hook the shortcode short-circuit checks below).
+			if ( false === has_filter( 'wpcalep_handler' ) ) {
 				add_action( 'admin_menu', array( $this, 'add_options_page' ) );
 				add_action( 'admin_init', array( $this, 'register_setting' ) );
 			}
@@ -639,7 +640,14 @@ data-wpcalel-query-str="<?php echo $a['query_str'] ? 'true' : 'false'; ?>"
 		 * Whitelists our settings
 		 */
 		public function register_setting() {
-			register_setting( $this->settings_name, $this->settings_name, array( $this, 'validate_settings' ) );
+			register_setting(
+				$this->settings_name,
+				$this->settings_name,
+				array(
+					'sanitize_callback' => array( $this, 'validate_settings' ),
+					'autoload'          => false,
+				)
+			);
 		}
 
 
@@ -670,24 +678,22 @@ data-wpcalel-query-str="<?php echo $a['query_str'] ? 'true' : 'false'; ?>"
 			// Get the Event Types.
 			$response = wp_remote_get( $this->calendly_api_url_v2 . '/event_types?user=' . $user->uri, $args );
 
-			if ( wp_remote_retrieve_response_code( $response ) === 200 ) {
+			if ( ! is_wp_error( $response ) && 200 === (int) wp_remote_retrieve_response_code( $response ) ) {
 				$body = json_decode( wp_remote_retrieve_body( $response ) );
 
 				/* translators:  1: the Calendly account holder's name */
-				$owner     = sprintf( __( 'Profile (%1$s)', 'cal-embedder-lite' ), $user->name );
-				$owner_url = $user->scheduling_url;
-
+				$owner              = sprintf( __( 'Profile (%1$s)', 'cal-embedder-lite' ), $user->name );
+				$owner_url          = $user->scheduling_url;
 				$data[ $owner_url ] = $owner;
 
-				foreach ( $body->collection as $event_type ) {
-					if ( $event_type->scheduling_url === $owner_url ) {
-						continue;
+				if ( is_object( $body ) && isset( $body->collection ) && is_array( $body->collection ) ) {
+					foreach ( $body->collection as $event_type ) {
+						if ( $event_type->scheduling_url === $owner_url ) {
+							continue;
+						}
+
+						$data[ $event_type->scheduling_url ] = $event_type->name;
 					}
-
-					$name = $event_type->name;
-					$url  = $event_type->scheduling_url;
-
-					$data[ $url ] = $name;
 				}
 
 				/**
@@ -709,18 +715,21 @@ data-wpcalel-query-str="<?php echo $a['query_str'] ? 'true' : 'false'; ?>"
 		public function get_calendly_user( $args ) {
 			$response = wp_remote_get( $this->calendly_api_url_v2 . '/users/me', $args );
 
-			$user = false;
-			if ( wp_remote_retrieve_response_code( $response ) === 200 ) {
-				$body = json_decode( wp_remote_retrieve_body( $response ) );
-
-				$user = (object) array(
-					'uri'            => $body->resource->uri,
-					'name'           => $body->resource->name,
-					'scheduling_url' => $body->resource->scheduling_url,
-				);
+			if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+				return false;
 			}
 
-			return $user;
+			$body = json_decode( wp_remote_retrieve_body( $response ) );
+
+			if ( ! is_object( $body ) || ! isset( $body->resource->uri, $body->resource->name, $body->resource->scheduling_url ) ) {
+				return false;
+			}
+
+			return (object) array(
+				'uri'            => $body->resource->uri,
+				'name'           => $body->resource->name,
+				'scheduling_url' => $body->resource->scheduling_url,
+			);
 		}
 
 
@@ -741,30 +750,28 @@ data-wpcalel-query-str="<?php echo $a['query_str'] ? 'true' : 'false'; ?>"
 			// Get the Event Types.
 			$response = wp_remote_get( $this->calendly_api_url_v1 . '/users/me/event_types?include=owner', $args );
 
-			if ( wp_remote_retrieve_response_code( $response ) === 200 ) {
+			if ( ! is_wp_error( $response ) && 200 === (int) wp_remote_retrieve_response_code( $response ) ) {
 				$body = json_decode( wp_remote_retrieve_body( $response ) );
 
-				/* translators:  1: the Calendly account holder's name */
-				$owner     = sprintf( __( 'Profile (%1$s)', 'cal-embedder-lite' ), $body->included[0]->attributes->name );
-				$owner_url = $body->included[0]->attributes->url;
+				if ( is_object( $body ) && isset( $body->included[0]->attributes->name, $body->included[0]->attributes->url ) && ! empty( $body->data ) ) {
+					/* translators:  1: the Calendly account holder's name */
+					$owner              = sprintf( __( 'Profile (%1$s)', 'cal-embedder-lite' ), $body->included[0]->attributes->name );
+					$owner_url          = $body->included[0]->attributes->url;
+					$data[ $owner_url ] = $owner;
 
-				$data[ $owner_url ] = $owner;
+					foreach ( $body->data as $event_type ) {
+						if ( $event_type->attributes->url === $owner_url ) {
+							continue;
+						}
 
-				foreach ( $body->data as $event_type ) {
-					if ( $event_type->attributes->url === $owner_url ) {
-						continue;
+						$data[ $event_type->attributes->url ] = $event_type->attributes->name;
 					}
 
-					$name = $event_type->attributes->name;
-					$url  = $event_type->attributes->url;
-
-					$data[ $url ] = $name;
+					/**
+					 * Store the transient for 2 days. We automatically refresh after that.
+					 */
+					set_transient( self::$transient, $data, DAY_IN_SECONDS * 2 );
 				}
-
-				/**
-				 * Store the transient for 2 days. We automatically refresh after that.
-				 */
-				set_transient( self::$transient, $data, DAY_IN_SECONDS * 2 );
 			}
 
 			return $data;
@@ -778,6 +785,10 @@ data-wpcalel-query-str="<?php echo $a['query_str'] ? 'true' : 'false'; ?>"
 		 * @return string
 		 */
 		public static function validate_settings( $_post ) {
+			if ( ! is_array( $_post ) ) {
+				return $_post;
+			}
+
 			ksort( $_post );
 			$user = false;
 			foreach ( $_post as $key => $value ) {
@@ -789,17 +800,34 @@ data-wpcalel-query-str="<?php echo $a['query_str'] ? 'true' : 'false'; ?>"
 						}
 						break;
 					case 'pat':
-						$value = trim( $value );
-						if ( ! $value && empty( $_post['disconnect'] ) ) {
+						if ( ! empty( $_post['disconnect'] ) ) {
+							break; // Handled by the 'disconnect' case.
+						}
+
+						$value = sanitize_text_field( trim( $value ) );
+
+						if ( '' === $value ) {
+							// Blank submit with a token already saved = keep it. The
+							// field is masked and the secret is never re-rendered.
+							$existing = get_option( __CLASS__, array() );
+							if ( is_array( $existing ) && ! empty( $existing['pat'] ) ) {
+								$_post['pat'] = $existing['pat'];
+								break;
+							}
+
 							add_settings_error( __CLASS__, esc_attr( 'Personal Access Token' ), __( 'The Personal Access Token is required', 'cal-embedder-lite' ) );
 							unset( $_post[ $key ] );
+							break;
+						}
+
+						$args = wpcalel()->build_args_for_pat( $value );
+						$user = wpcalel()->get_calendly_user( $args );
+
+						if ( ! $user ) {
+							add_settings_error( __CLASS__, esc_attr( 'Personal Access Token' ), __( 'The Personal Access Token used is incorrect or has been revoked.', 'cal-embedder-lite' ) );
+							unset( $_post[ $key ] );
 						} else {
-							$args = wpcalel()->build_args_for_pat( $value );
-							$user = wpcalel()->get_calendly_user( $args );
-							if ( ! $user ) {
-								add_settings_error( __CLASS__, esc_attr( 'Personal Access Token' ), __( 'The Personal Access Token used is incorrect or has been revoked.', 'cal-embedder-lite' ) );
-								unset( $_post[ $key ] );
-							}
+							$_post['pat'] = $value;
 						}
 						break;
 					case 'disconnect':
@@ -831,7 +859,7 @@ data-wpcalel-query-str="<?php echo $a['query_str'] ? 'true' : 'false'; ?>"
 			$args = array(
 				'headers' => array(
 					'Authorization' => 'Bearer ' . $pat,
-					'Content-type: application/json',
+					'Content-Type'  => 'application/json',
 				),
 			);
 

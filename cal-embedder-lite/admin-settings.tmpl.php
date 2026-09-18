@@ -6,6 +6,8 @@
  * @version 1.0
  */
 
+defined( 'ABSPATH' ) || exit;
+
 $wpcalel_button_text = __( 'Refresh URLs', 'cal-embedder-lite' );
 
 ?>
@@ -57,6 +59,8 @@ $wpcalel_button_text = __( 'Refresh URLs', 'cal-embedder-lite' );
 
 								<p><?php esc_html_e( 'Please enter your Calendly Personal Access Token below and click "Connect". This will help us get your Event Types from Calendly and display them in the shortcode builder.', 'cal-embedder-lite' ); ?></p>
 
+								<p class="description"><?php esc_html_e( 'When Calendly asks you to choose scopes for the token, this plugin only needs read access. Under "Scheduling" check "event_types:read", and under "User management" check "users:read". You can leave everything else unchecked.', 'cal-embedder-lite' ); ?></p>
+
 								<?php
 									$wpcalel_button_text = __( 'Connect', 'cal-embedder-lite' );
 									$wpcalel_value       = '';
@@ -81,7 +85,7 @@ $wpcalel_button_text = __( 'Refresh URLs', 'cal-embedder-lite' );
 							<?php endif; ?>
 
 								<p>
-									<input type="text" class="wide" name="<?php echo esc_html( $this->settings_name ); ?>[<?php echo esc_attr( $wpcalel_key ); ?>]" value="<?php echo esc_attr( $wpcalel_value ); ?>" />
+									<input type="password" class="wide" autocomplete="off" name="<?php echo esc_attr( $this->settings_name ); ?>[<?php echo esc_attr( $wpcalel_key ); ?>]" value="" placeholder="<?php echo ( isset( $this->settings->pat ) || isset( $this->settings->api_key ) ) ? esc_attr__( 'A token is saved — leave blank to keep it', 'cal-embedder-lite' ) : esc_attr__( 'Paste your Personal Access Token', 'cal-embedder-lite' ); ?>" />
 								</p>							
 
 							<?php if ( ! isset( $this->settings->api_key ) && ! isset( $this->settings->pat ) ) : ?>
@@ -140,7 +144,7 @@ $wpcalel_button_text = __( 'Refresh URLs', 'cal-embedder-lite' );
 										</th>
 									</tr>
 									<tr>
-										<th><?php esc_html_e( 'URL', 'cal-embedder-lite' ); ?></th>
+										<th><?php echo ! empty( $wpcalel_url_info ) ? esc_html__( 'Calendly Page', 'cal-embedder-lite' ) : esc_html__( 'URL', 'cal-embedder-lite' ); ?></th>
 										<td>
 											<?php if ( ! empty( $wpcalel_url_info ) ) : ?>
 											<select id="url">
