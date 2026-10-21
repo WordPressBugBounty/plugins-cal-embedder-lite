@@ -24,6 +24,7 @@ $wpcalel_button_text = __( 'Refresh URLs', 'cal-embedder-lite' );
 				<?php /* translators: the plugin version */ ?>
 				<h1><?php printf( esc_html__( 'UseStrict\'s Calendly Embedder (v%s)', 'cal-embedder-lite' ), esc_html( self::VERSION ) ); ?></h1>
 
+
 				<div class="postbox">
 					<h2 class="hndle"><?php esc_html_e( 'Integration', 'cal-embedder-lite' ); ?></h2>
 					<div class="inside">
@@ -352,9 +353,9 @@ $wpcalel_button_text = __( 'Refresh URLs', 'cal-embedder-lite' );
 										<li>
 											<strong><?php esc_html_e( 'Custom Answers 1 to 10:', 'cal-embedder-lite' ); ?></strong>
 											<?php
-											/* translators: Calendly help URL */
 											printf(
 												wp_kses(
+													/* translators: %s: Calendly help URL */
 													__( 'Calendly allows for up to 10 extra fields of various types. They explain the values you can enter <a href="%s" target="_blank">here</a>.', 'cal-embedder-lite' ),
 													array(
 														'a' => array(
@@ -369,39 +370,6 @@ $wpcalel_button_text = __( 'Refresh URLs', 'cal-embedder-lite' );
 										</li>
 									</ul>
 
-									<div class="promo">
-										<p>
-										<?php
-										echo wp_kses(
-											sprintf(
-												/* translators: Link to plugin author site */
-												__( 'For more powerful control of your widgets, check out our Calendly Embedder Pro plugin over at <a href="%s">UseStrict Consulting</a>.', 'cal-embedder-lite' ),
-												esc_url( 'https://usestrict.net/calendly-embedder-pro/?utm_source=settings_screen&utm_medium=plugin&utm_campaign=promotion' )
-											),
-											array(
-												'a' => array(
-													'href' => array(),
-												),
-											)
-										);
-										?>
-										</p>
-										<p><?php esc_html_e( 'Features include:', 'cal-embedder-lite' ); ?></p>
-										<ul>
-											<li><?php esc_html_e( 'Save your shortcodes in the shortcode library for ease of use.', 'cal-embedder-lite' ); ?></li>
-											<li><?php esc_html_e( 'Embed using a Gutenberg block.', 'cal-embedder-lite' ); ?></li>
-											<li><?php esc_html_e( 'Embed using an Elementor widget.', 'cal-embedder-lite' ); ?></li>
-											<li><?php esc_html_e( 'Setting Google Analytics variables (Campaign, Source, Medium, Content and Term)', 'cal-embedder-lite' ); ?></li>
-											<li><?php esc_html_e( 'Track interaction such as:', 'cal-embedder-lite' ); ?>
-												<ul>
-													<li><?php esc_html_e( 'Profile page was viewed', 'cal-embedder-lite' ); ?></li>
-													<li><?php esc_html_e( 'Event type page was viewed', 'cal-embedder-lite' ); ?></li>
-													<li><?php esc_html_e( 'Invitee selected date and time', 'cal-embedder-lite' ); ?></li>
-													<li><?php esc_html_e( 'Invitee successfully booked a meeting', 'cal-embedder-lite' ); ?></li>
-												</ul>
-											</li>
-										</ul>	
-									</div>
 								</div>
 							</div>
 						</div>

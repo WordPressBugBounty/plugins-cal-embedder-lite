@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || die( 'No direct access allowed' );
  * Author URI:      https://usestrict.consulting
  * Text Domain:     cal-embedder-lite
  * Domain Path:     /language
- * Version:         1.2.2
+ * Version:         1.2.3
  *
  * @package         Wp_Cal_Embed_Lite
  */
@@ -40,7 +40,17 @@ if ( ! class_exists( 'Wp_Cal_Embed_Lite' ) ) :
 		 *
 		 * @var string
 		 */
-		const VERSION = '1.2.2';
+		const VERSION = '1.2.3';
+
+		/**
+		 * User meta recording that the upgrade notice was dismissed.
+		 *
+		 * Per user rather than per site: on a multi-admin site one person
+		 * dismissing it should not decide for everyone else.
+		 *
+		 * @var string
+		 */
+		const DISMISS_META = 'wpcalel_upgrade_notice_dismissed';
 
 		/**
 		 * Holds our environment variables.
@@ -142,6 +152,17 @@ if ( ! class_exists( 'Wp_Cal_Embed_Lite' ) ) :
 			add_action( 'init', array( $this, 'load_textdomain' ) );
 			add_action( 'init', array( $this, 'add_shortcode' ) );
 			add_action( 'wp_ajax_wpcalel-userinfo', array( $this, 'ajax_get_user_info' ) );
+
+			// The upgrade notice is hooked unconditionally and decides for itself
+			// whether to render. It must NOT sit behind the load-time
+			// has_filter( 'wpcalep_handler' ) check used below: this file is
+			// included before cal-embedder-pro's, so at this point Pro has not
+			// registered that filter yet and the check reads false even when Pro is
+			// active. Pro works around that for the menu by removing it at
+			// admin_menu priority 999, which does nothing for a notice. By the time
+			// admin_notices fires, every plugin has loaded and the check is sound.
+			add_action( 'admin_notices', array( $this, 'upgrade_notice' ) );
+			add_action( 'wp_ajax_wpcalel-dismiss-upgrade', array( $this, 'ajax_dismiss_upgrade' ) );
 
 			// Register menu only if Pro is not present (it signals via wpcalep_handler,
 			// the same hook the shortcode short-circuit checks below).
@@ -564,6 +585,102 @@ data-wpcalel-query-str="<?php echo $a['query_str'] ? 'true' : 'false'; ?>"
 			$content = ob_get_clean();
 
 			return $content;
+		}
+
+		/**
+		 * Admin screens that may carry the upgrade notice.
+		 *
+		 * Deliberately not every screen. A plugin that nags on all of wp-admin
+		 * earns a one-star review and a wp.org guideline complaint; these are the
+		 * three places someone evaluating plugins actually is.
+		 *
+		 * @return array
+		 */
+		private function upgrade_notice_screens() {
+			return array(
+				'dashboard',
+				'plugins',
+				// Our own settings page. sanitize_key() because WP_Screen runs the
+				// hook name through it, which lowercases -- the menu slug is the
+				// mixed-case class name, so a literal comparison never matches.
+				sanitize_key( 'settings_page_' . __CLASS__ ),
+			);
+		}
+
+		/**
+		 * Show the Calendly Embedder Pro upgrade notice.
+		 *
+		 * Every reason to bail is checked here rather than at hook time -- see the
+		 * note in add_actions() about why the Pro check cannot be made earlier.
+		 */
+		public function upgrade_notice() {
+			// Pro is active, so there is nothing to upsell. Reliable at this point:
+			// admin_notices fires long after every plugin has loaded.
+			if ( has_filter( 'wpcalep_handler' ) ) {
+				return;
+			}
+
+			// Only people who could actually act on it.
+			if ( ! current_user_can( 'manage_options' ) ) {
+				return;
+			}
+
+			if ( get_user_meta( get_current_user_id(), self::DISMISS_META, true ) ) {
+				return;
+			}
+
+			$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
+			if ( ! $screen || ! in_array( $screen->id, $this->upgrade_notice_screens(), true ) ) {
+				return;
+			}
+
+			$pro_url = 'https://usestrict.net/calendly-embedder-pro/?utm_source=admin_notice&utm_medium=plugin&utm_campaign=upgrade';
+			?>
+			<div class="notice notice-info is-dismissible wpcalel-upgrade-notice"
+				data-nonce="<?php echo esc_attr( wp_create_nonce( 'wpcalel-dismiss-upgrade' ) ); ?>">
+				<h3><?php esc_html_e( 'Ask your AI assistant about your bookings', 'cal-embedder-lite' ); ?></h3>
+				<p><?php esc_html_e( 'Calendly Embedder Pro runs a read-only MCP server, so Claude, ChatGPT or Cursor can answer questions about your own booking data — "what was my no-show rate in September?" — straight from your site. You connect it once from the Pro settings.', 'cal-embedder-lite' ); ?></p>
+				<p><?php esc_html_e( 'Pro also saves every embed to a library you edit in one place, tracks the funnel from first view to completed booking with kept and no-show outcomes, and fires GA4 and Meta conversion events. Already have shortcodes on your pages? Pro imports them, so upgrading is not a rebuild.', 'cal-embedder-lite' ); ?></p>
+				<p>
+					<a class="button button-primary" href="<?php echo esc_url( $pro_url ); ?>" target="_blank" rel="noopener">
+						<?php esc_html_e( 'See Calendly Embedder Pro', 'cal-embedder-lite' ); ?>
+					</a>
+				</p>
+			</div>
+			<script>
+			jQuery( function ( $ ) {
+				$( '.wpcalel-upgrade-notice' ).on( 'click', '.notice-dismiss', function () {
+					$.post( ajaxurl, {
+						action: 'wpcalel-dismiss-upgrade',
+						nonce: $( this ).closest( '.wpcalel-upgrade-notice' ).data( 'nonce' )
+					} );
+				} );
+			} );
+			</script>
+			<?php
+		}
+
+		/**
+		 * Remember that this user dismissed the upgrade notice.
+		 *
+		 * Core's is-dismissible only hides the notice for the current page load,
+		 * so without this it would be back on the next screen.
+		 */
+		public function ajax_dismiss_upgrade() {
+			$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : '';
+
+			if ( ! wp_verify_nonce( $nonce, 'wpcalel-dismiss-upgrade' ) ) {
+				wp_send_json_error( __( 'Missing or bad nonce', 'cal-embedder-lite' ), 403 );
+			}
+
+			if ( ! current_user_can( 'manage_options' ) ) {
+				wp_send_json_error( __( 'Insufficient permissions', 'cal-embedder-lite' ), 403 );
+			}
+
+			update_user_meta( get_current_user_id(), self::DISMISS_META, 1 );
+
+			wp_send_json_success();
 		}
 
 		/**

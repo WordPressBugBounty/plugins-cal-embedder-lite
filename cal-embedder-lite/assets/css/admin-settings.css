@@ -92,11 +92,12 @@
   clear: both;
 }
 
-.promo {
-  border: 2px dashed rgb(102,159,181);
-  padding: 10px;
-  font-weight: bold;
-}
+/*
+ * Upgrade prompt, directly under the page title. The old .promo rule styled a
+ * block buried at the foot of the Instructions column; it is gone, and the
+ * dashed border and blanket bold went with it -- at the top of the page that
+ * read as a warning rather than an offer.
+ */
 
 @media screen and (max-width: 768px) {
   

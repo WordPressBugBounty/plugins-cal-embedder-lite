@@ -3,9 +3,9 @@ Contributors: useStrict
 Donate link: https://paypal.me/usestrict
 Tags: calendar, calendly, embed
 Requires at least: 4.5
-Tested up to: 7.1.1
+Tested up to: 7.1.3
 Requires PHP: 7.4
-Stable tag: 1.2.2
+Stable tag: 1.2.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,23 +13,33 @@ Simple but powerful embedding for Calendly.
 
 == Description ==
 
-Easily embed Calendly widgets onto your pages, with the ability to prefill the fields from the database or query strings. Prefilling is
-done via Javascript and Ajax, so it is **caching-safe**.
+Embed Calendly on any WordPress page with a shortcode you build by pointing and clicking, instead of hand-writing Calendly's embed code.
 
-Use the configurator in the settings to generate the shortcode with all supported parameters.
+**What the free plugin does**
 
-Check out the <a href="https://usestrict.net/calendly-embedder-pro/?utm_source=readme&utm_medium=plugin&utm_campaign=promotion" target="_blank" title="UseStrict's Calendly Embedder Pro">Pro version</a> for the following:
+* **Three embed types.** Inline calendar, pop-up text link, or the floating pop-up widget (badge), each with its own options.
+* **Connect your Calendly account** with a Personal Access Token and pick your profile page or any event type from a dropdown. No copying URLs around. Without a token, paste the Calendly URL instead.
+* **Caching-safe prefill.** Fill the booking form with the logged-in user's name and email, or with values from the query string. The prefill runs in the browser through AJAX after the page loads, so it keeps working behind full-page caches and CDNs, where server-side prefill can serve one visitor's details to the next.
+* **Up to ten custom answers**, prefilled the same way.
+* **Match your site.** Background, text and button colours, minimum width and height, extra CSS classes and inline styles.
+* **Hide what you do not need.** The GDPR cookie banner, landing page details and event type details.
+* **Shortcode builder** under Settings. Choose the options, copy the generated shortcode, paste it into any page, post, widget or page builder that runs shortcodes.
 
-* Save your shortcodes in a library for ease of use;
-* Embed using a Gutenberg block;
-* Embed using an Elementor widget;
-* Setting Google Analytics variables (Campaign, Source, Medium, Content and Term)
-* Tracking interaction such as
- * Profile page was viewed
- * Event type page was viewed
- * Invitee selected date and time
- * Invitee successfully booked a meeting
+The builder generates a shortcode; it does not store it. To change an embed later, edit the shortcode where you pasted it, or build a new one.
 
+**Going further: Calendly Embedder Pro**
+
+<a href="https://usestrict.net/calendly-embedder-pro/?utm_source=readme&utm_medium=plugin&utm_campaign=promotion" target="_blank" title="UseStrict's Calendly Embedder Pro">Pro</a> picks up where the free plugin stops, and your existing embeds come with you: Pro finds the shortcodes already in your posts and pages and pulls them into a library, so upgrading is not a rebuild.
+
+* **A shortcode library.** Save each embed once, reuse it anywhere, edit it in one place and every page updates. Place it with a shortcode, the Calendly Embed block, or the Elementor widget.
+* **Booking analytics on your own site.** The funnel from profile view to completed booking, plus kept, no-show and cancelled outcomes by month.
+* **Ask your AI assistant.** A read-only MCP server lets Claude, ChatGPT or Cursor query your booking data live. No extra API key; it uses the Calendly connection you already have. "What was my no-show rate in September?" is one question.
+* **Campaign tagging.** Tag any embed with UTM parameters — source, medium, campaign, content and term — globally or per embed. These are standard UTM tags, so whichever analytics you run reads them, and Calendly records them against the booking as well.
+* **Conversion tracking.** GA4 and Meta Pixel events on every completed booking, through the tags already on your site.
+* **Lead capture.** Posts each new booking to any webhook URL: Zapier, Make, n8n, or a HubSpot workflow.
+* **More ways to book.** Multi-event tabs, live availability next to the embed, email reminders, a bookings screen in wp-admin, WooCommerce integration, a redirect after booking, and a CSV export of your tracking data.
+
+Pro runs alongside the free plugin, and your existing shortcodes keep working.
 
 == Installation ==
 
@@ -49,7 +59,21 @@ Check out the <a href="https://usestrict.net/calendly-embedder-pro/?utm_source=r
 
 == Frequently Asked Questions ==
 
-No F.A.Q. yet.
+= Does it work with page caching and CDNs? =
+
+Yes. Prefilling happens in the browser, through an AJAX call after the page loads, so cached pages still show each visitor their own details.
+
+= Do I need a Calendly API token? =
+
+No. The Personal Access Token only powers the dropdown of your profile page and event types in the builder. Without one, paste your Calendly URL into the builder instead.
+
+= Can I edit a shortcode after I have generated it? =
+
+The free builder does not save what you build. Edit the shortcode's attributes where you pasted it, or build a new one and replace it. If you have many embeds to keep in sync, Pro keeps them in a library and imports the shortcodes already on your site.
+
+= Can I use it in the block editor or Elementor? =
+
+Yes. Paste the shortcode into a Shortcode block, Elementor's Shortcode widget, or anywhere else shortcodes run. Pro adds a dedicated Calendly Embed block and Elementor widget that pick a saved embed from a dropdown.
 
 == Screenshots ==
 
@@ -61,6 +85,11 @@ No F.A.Q. yet.
 
 
 == Changelog ==
+= 1.2.3 =
+* Settings screen: refresh the Calendly Embedder Pro section. It now leads with the shortcode importer, which brings the shortcodes already on your site into Pro's library, and drops a stale feature list.
+* Correct a long-standing description: the five campaign settings emit standard UTM parameters, so any analytics tool reads them. They were previously described as Google Analytics variables.
+* Add a phpcs ruleset for the plugin and fix a missing translator comment.
+
 = 1.2.2 =
 * Security: the Calendly Personal Access Token is no longer displayed in the settings page and is stored in a non-autoloaded option.
 * Reliability: guard against malformed/failed Calendly API responses (no more PHP warnings or empty dropdowns on a transient outage).
